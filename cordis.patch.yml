@@ -1,0 +1,14 @@
+# dsh-aurora-glass bundle patch layer.
+#
+# This package is a "bundle": when it is installed into a profile
+# (`dsh plugin --profile web add <this package>`), the CLI appends it to the
+# profile's `dsh.profile.bundles` stack and this patch is applied as the last
+# layer. The single insert below mounts the plugin row whose package name the
+# client-modules node half scans into the client boot graph — that is what puts
+# the `dsh.client` browser roster entry on the wire.
+#
+# The row `id` doubles as the settings entry id the browser half passes to
+# `ctx.configForms.get(...)`, so it must stay `aurora-glass`.
+- insert:
+    - id: aurora-glass
+      name: 'dsh-aurora-glass'
