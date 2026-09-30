@@ -10,6 +10,8 @@ Aurora Glass — 一个**原创**的 DeepSeek Harness Web UI 背景美化插件�
 
 本包适配 **dsh 0.2.x**（开发与验证基于 `0.2.0-rc.2`）：客户端通过 `ctx.configForms` 读写自身条目的设置表单，设置页注册到 `settings.section` slot 并跟随 Host 实际服务的命名空间。0.1.x 上的 `ctx.settingsScope` 接口已不存在，因此 0.1.x 请使用 `dsh-aurora-glass@0.1.0`。
 
+> **0.2.1 修复**：0.2 的界面把**三层容器**（`body`、应用 frame、主列 root）都刷上 `--dsw-alias-bg-base`，三层半透明合成后约 95% 不透明，会把极光背景整片盖住（表现为"开了但看不出变化"）。现在背景层开启时这些容器不再刷底色，只有真正的面板保留表面色，极光因此能完整透出。
+
 ---
 
 ## 安装
