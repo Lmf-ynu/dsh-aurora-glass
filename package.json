@@ -1,6 +1,6 @@
 {
   "name": "dsh-aurora-glass",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Aurora Glass — an original background & liquid-glass appearance plugin for the DeepSeek Harness Web UI (custom wallpapers and frosted translucent panels).",
   "license": "MIT",
   "type": "module",
