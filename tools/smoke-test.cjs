@@ -81,6 +81,9 @@ const scopeState = {
   mode: 'host'
 };
 const calls = { set: [], unset: [], entries: [], served: [] };
+// The Host answers a refused write by resolving `false`; flip this to model a
+// Host that rejects (a read-only deployment, or a stuck reload transaction).
+const scopeControl = { refuse: false };
 
 const ctx = {
   effect(fn) { const ret = fn(); return typeof ret === 'function' ? ret : () => {}; },
@@ -100,8 +103,8 @@ const ctx = {
         entryId,
         getSnapshot: () => scopeState,
         subscribe: () => () => {},
-        set(field, value) { calls.set.push([field, value]); return Promise.resolve(); },
-        unset(field) { calls.unset.push(field); return Promise.resolve(); }
+        set(field, value) { calls.set.push([field, value]); return Promise.resolve(scopeControl.refuse ? false : undefined); },
+        unset(field) { calls.unset.push(field); return Promise.resolve(scopeControl.refuse ? false : undefined); }
       };
     },
     // The real service registers the contribution once the Host serves the
@@ -168,13 +171,22 @@ assert(typeof face.preview === 'function' && typeof face.update === 'function' &
 assert(face.getSnapshot().value.enabled === false, 'scope snapshot resolves defaults');
 
 // Reset should unset every known field through the scope API.
-face.reset().then(() => {
+face.reset().then((accepted) => {
   const expected = ['enabled', 'preset', 'image', 'dim', 'glass'];
   const ok = expected.every((f) => calls.unset.includes(f));
   assert(ok, `reset() unsets all five fields (got ${JSON.stringify(calls.unset)})`);
+  assert(accepted === true, `reset() reports an accepted write (got ${accepted})`);
+  assert(typeof face.adopt === 'function', 'face exposes adopt so a refused write can be rolled back');
 
   face.update({ preset: 'ocean' }).then(() => {
     assert(calls.set.some(([f]) => f === 'preset'), 'update() writes through the settings scope');
-    console.log(process.exitCode ? '\nSMOKE TEST FAILED' : '\nSMOKE TEST PASSED');
+
+    // A Host that refuses resolves `false` rather than rejecting, so the
+    // section has to read the resolved value; otherwise the click is silent.
+    scopeControl.refuse = true;
+    face.reset().then((refused) => {
+      assert(refused === false, `reset() reports a refused write (got ${refused})`);
+      console.log(process.exitCode ? '\nSMOKE TEST FAILED' : '\nSMOKE TEST PASSED');
+    });
   });
 });
